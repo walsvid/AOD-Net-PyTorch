@@ -1,13 +1,8 @@
 import os
-import sys
-
 import torch
-import torchvision
-import numpy as np
 from PIL import Image
 import glob
 import random
-import cv2
 
 
 class HazeDataset(torch.utils.data.Dataset):
