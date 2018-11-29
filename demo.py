@@ -1,7 +1,5 @@
 import os
-import random
 import glob
-import cv2
 import torch
 import torch.backends.cudnn
 import torch.nn
@@ -9,8 +7,6 @@ import torch.nn.parallel
 import torch.optim
 import torch.utils.data
 import torchvision
-from torchvision.utils import make_grid
-from tensorboardX import SummaryWriter
 from PIL import Image
 from utils import logger
 from config import get_config
