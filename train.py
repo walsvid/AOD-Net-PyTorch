@@ -7,39 +7,31 @@ import torch.nn
 import torch.nn.parallel
 import torch.optim
 import torch.utils.data
+import torchvision
 from torchvision import transforms
 from torchvision.utils import make_grid
 from tensorboardX import SummaryWriter
-from PIL import Image
 from utils import logger
 from config import get_config
 from model import AODnet
 from data import HazeDataset
-import dataloader
-
-
-# @logger
-# def set_random_seed(cfg):
-#     cfg.manualSeed = random.randint(1, 10000)
-#     random.seed(cfg.manualSeed)
-#     torch.manual_seed(cfg.manualSeed)
-#     if torch.cuda.is_available():
-#         torch.cuda.manual_seed_all(cfg.manualSeed)
-#     print('Random Seed: ', cfg.manualSeed)
 
 
 @logger
 def load_data(cfg):
     data_transform = transforms.Compose([
         transforms.Resize([480, 640]),
-        transforms.ToTensor(),
-        # lambda x: x[:3, ::],
-        # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        transforms.ToTensor()
     ])
-    haze_dataset = HazeDataset(cfg.ori_data_path, cfg.haze_data_path, data_transform)
-    loader = torch.utils.data.DataLoader(haze_dataset, batch_size=cfg.batch_size, shuffle=True,
-                                         num_workers=cfg.threads, drop_last=True, pin_memory=True)
-    return loader, len(loader)
+    train_haze_dataset = HazeDataset(cfg.ori_data_path, cfg.haze_data_path, data_transform)
+    train_loader = torch.utils.data.DataLoader(train_haze_dataset, batch_size=cfg.batch_size, shuffle=True,
+                                               num_workers=cfg.num_workers, drop_last=True, pin_memory=True)
+
+    val_haze_dataset = HazeDataset(cfg.val_ori_data_path, cfg.val_haze_data_path, data_transform)
+    val_loader = torch.utils.data.DataLoader(val_haze_dataset, batch_size=cfg.val_batch_size, shuffle=False,
+                                             num_workers=cfg.num_workers, drop_last=True, pin_memory=True)
+
+    return train_loader, len(train_loader), val_loader, len(val_loader)
 
 
 @logger
@@ -95,7 +87,7 @@ def main(cfg):
     summary = load_summaries(cfg)
     # -------------------------------------------------------------------
     # load data
-    train_loader, train_number = load_data(cfg)
+    train_loader, train_number, val_loader, val_number = load_data(cfg)
     # -------------------------------------------------------------------
     # load loss
     criterion = loss_func(device)
@@ -121,13 +113,28 @@ def main(cfg):
             optimizer.step()
             summary.add_scalar('loss', loss.item(), count)
             if step % cfg.print_gap == 0:
-                summary.add_image('DeHaze_Images', make_grid(dehaze_image[:4].data, normalize=True, scale_each=True), count)
+                summary.add_image('DeHaze_Images', make_grid(dehaze_image[:4].data, normalize=True, scale_each=True),
+                                  count)
                 summary.add_image('Haze_Images', make_grid(haze_image[:4].data, normalize=True, scale_each=True), count)
-                summary.add_image('Origin_Images', make_grid(ori_image[:4].data, normalize=True, scale_each=True), count)
+                summary.add_image('Origin_Images', make_grid(ori_image[:4].data, normalize=True, scale_each=True),
+                                  count)
             print('Epoch: {}/{}  |  Step: {}/{}  |  lr: {:.6f}  | Loss: {:.6f}'
-                  .format(epoch+1, cfg.epochs, step+1, train_number,
+                  .format(epoch + 1, cfg.epochs, step + 1, train_number,
                           optimizer.param_groups[0]['lr'], loss.item()))
+        # eval model
+        print('EVAL')
+        network.eval()
+        for step, (ori_image, haze_image) in enumerate(val_loader):
+            ori_image, haze_image = ori_image.to(device), haze_image.to(device)
+            dehaze_image = network(haze_image)
+            torchvision.utils.save_image(
+                torchvision.utils.make_grid(torch.cat((haze_image, dehaze_image, ori_image), 0),
+                                            nrow=ori_image.shape[0]),
+                os.path.join(cfg.sample_output_folder, '{}_{}.jpg'.format(epoch + 1, step)))
+        network.train()
         save_model(epoch, cfg.model_dir, network, optimizer, cfg.net_name)
+
+        summary.flush()
     summary.close()
 
 

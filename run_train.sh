@@ -7,8 +7,11 @@ python train.py --epochs 10 \
                 --gpu 3 \
                 --ori_data_path /home/wc/data/Haze/train/ori/ \
                 --haze_data_path /home/wc/data/Haze/train/haze/ \
-                --threads 2 \
+                --val_ori_data_path /home/wc/data/Haze/val/ori/ \
+                --val_haze_data_path /home/wc/data/Haze/val/haze/ \
+                --num_workers 2 \
                 --batch_size 8 \
                 --print_gap 500 \
                 --model_dir /home/wc/workspace/AOD-Net.pytorch/models \
-                --log_dir /home/wc/workspace/AOD-Net.pytorch/logs
+                --log_dir /home/wc/workspace/AOD-Net.pytorch/logs \
+                --sample_output_folder /home/wc/workspace/AOD-Net.pytorch/samples
