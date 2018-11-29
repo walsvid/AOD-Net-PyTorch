@@ -121,10 +121,13 @@ def main(cfg):
             print('Epoch: {}/{}  |  Step: {}/{}  |  lr: {:.6f}  | Loss: {:.6f}'
                   .format(epoch + 1, cfg.epochs, step + 1, train_number,
                           optimizer.param_groups[0]['lr'], loss.item()))
-        # eval model
-        print('EVAL')
+        # -------------------------------------------------------------------
+        # start validation
+        print('Epoch: {}/{} | Validation Model Saving Images'.format(epoch + 1, cfg.epochs))
         network.eval()
         for step, (ori_image, haze_image) in enumerate(val_loader):
+            if step > 10:   # only save image 10 times
+                break
             ori_image, haze_image = ori_image.to(device), haze_image.to(device)
             dehaze_image = network(haze_image)
             torchvision.utils.save_image(
@@ -132,9 +135,11 @@ def main(cfg):
                                             nrow=ori_image.shape[0]),
                 os.path.join(cfg.sample_output_folder, '{}_{}.jpg'.format(epoch + 1, step)))
         network.train()
+        # -------------------------------------------------------------------
+        # save per epochs model
         save_model(epoch, cfg.model_dir, network, optimizer, cfg.net_name)
-
-        summary.flush()
+    # -------------------------------------------------------------------
+    # train finish
     summary.close()
 
 

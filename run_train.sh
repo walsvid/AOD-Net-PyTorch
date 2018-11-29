@@ -11,6 +11,7 @@ python train.py --epochs 10 \
                 --val_haze_data_path /home/wc/data/Haze/val/haze/ \
                 --num_workers 2 \
                 --batch_size 8 \
+                --val_batch_size 16 \
                 --print_gap 500 \
                 --model_dir /home/wc/workspace/AOD-Net.pytorch/models \
                 --log_dir /home/wc/workspace/AOD-Net.pytorch/logs \
