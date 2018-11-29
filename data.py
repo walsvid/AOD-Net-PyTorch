@@ -14,7 +14,7 @@ class HazeDataset(torch.utils.data.Dataset):
         self.file_list = []
         self.get_image_pair_list()
         self.transforms = transforms
-        print("Total training examples:", len(self.file_list))
+        print("Total data examples:", len(self.file_list))
 
     def __getitem__(self, item):
         """
