@@ -1,6 +1,4 @@
 import os
-import random
-
 import torch
 import torch.backends.cudnn
 import torch.nn
