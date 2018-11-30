@@ -13,6 +13,7 @@ This project is a *pytorch implementation* of AOD-Net : All-in-One Network for D
 During our implementing, we referred the above implementations. However, our implementation has several unique and new features compared with the above implementations:
 - **It has both train and test code** We provided both train and test code and pre-trained pytorch pickle file
 - **It has more clearly code structure** We refactore the code structure of the dataloader to make it more consistent with pytorch dataset
+- **It has better logging decorator** We add logging decorator for network pipeline function calling
 
 ## Preparation
 First of all, clone the code
@@ -43,6 +44,9 @@ chmod +x run_test.sh
 ## Demo
 This is the dehazing result image comparison. Left image is haze image, right image is clean image processed by AOD-Net.
 ![](https://i.loli.net/2018/11/30/5c00f22dbeb9d.jpg)
+
+## TODO
+- [ ] Integrate existing models with detection tasks
 
 ## Citation
 If you using this project in your work, please don't forget to cite the original author's paper.
