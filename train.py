@@ -9,7 +9,7 @@ import torchvision
 from torchvision import transforms
 from torchvision.utils import make_grid
 from tensorboardX import SummaryWriter
-from utils import logger
+from utils import logger, weight_init
 from config import get_config
 from model import AODnet
 from data import HazeDataset
@@ -42,16 +42,8 @@ def save_model(epoch, path, net, optimizer, net_name):
 
 @logger
 def load_network(device):
-    def weights_init(m):
-        classname = m.__class__.__name__
-        if classname.find('Conv') != -1:
-            m.weight.data.normal_(0.0, 0.02)
-        elif classname.find('BatchNorm') != -1:
-            m.weight.data.normal_(1.0, 0.02)
-            m.bias.data.fill_(0)
-
     net = AODnet().to(device)
-    net.apply(weights_init)
+    net.apply(weight_init)
     return net
 
 
@@ -69,7 +61,7 @@ def loss_func(device):
 
 @logger
 def load_summaries(cfg):
-    summary = SummaryWriter(log_dir=cfg.log_dir, comment='')
+    summary = SummaryWriter(log_dir=os.path.join(cfg.log_dir, cfg.net_name), comment='')
     return summary
 
 

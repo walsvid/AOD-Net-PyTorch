@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 python train.py --epochs 10 \
-                --net_name aod \
+                --net_name aod-xavier \
                 --lr 1e-4 \
                 --use_gpu true \
                 --gpu 3 \
